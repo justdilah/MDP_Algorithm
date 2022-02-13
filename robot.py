@@ -176,6 +176,7 @@ class Robot:
             y = (y+60) - round(60 * math.sin(math.radians(self.angleDegrees)),2)
             self.rotated = pygame.transform.rotozoom(self.img,math.degrees(0),1)
             self.rect = self.rotated.get_rect(center=(x,y))
+            print("dadsa")
         return x,y
 
     #bottom

@@ -39,7 +39,7 @@ TURN_ON_SPOT_RADIUS = 30
 TURN_ON_SPOT_RADIUS_GRID = TURN_ON_SPOT_RADIUS//UNIT_LENGTH
 ROBOT_VIEWING_GRID_LENGTH = 30
 
-class Vector:
+class State:
     def __init__(self,pos,orientation):
         self.pos = pos
         self.x = pos[0]
@@ -334,10 +334,7 @@ def make_grid(rows,width):
 def draw_grid(win, rows, width):
     gap = width // rows #integer division
     for i in range(rows):
-        #horizontal line 
-        #current index * gap - where we should be drawing the grid line
-        pygame.draw.line(win,GREY,(0,i * gap),(width, i * gap))
-        #vertical line
+        pygame.draw.line(win,GREY,(0,i * gap),(width, i * gap)) 
         for j in range(rows):
             pygame.draw.line(win,GREY, (j * gap,0), (j * gap,width))
 
@@ -369,52 +366,48 @@ def obstacles(start,grid,gap,win):
     obs1 = grid[13][3]
     x = obs1.get_pos()[0] * gap
     y = obs1.get_pos()[1] * gap
-    # obs1.image_side((obs1.return_center() + x,obs1.return_center() + y),math.radians(90),win)
      
     b1 = grid[11][2]
     
     obs2 = grid[4][13]
     x = obs2.get_pos()[0] * gap
     y = obs2.get_pos()[1] * gap
-    # obs2.image_side((obs2.return_center() + x,obs2.return_center() + y),math.radians(270),win)
 
     b2 = grid[4][15]
 
     obs3 = grid[10][5]
     x = obs3.get_pos()[0] * gap
     y = obs3.get_pos()[1] * gap
-    # obs3.image_side((obs3.return_center() + x,obs3.return_center() + y),math.radians(90),win)
 
     b3 = grid[8][5]
 
     obs4 = grid[17][15]
     x = obs4.get_pos()[0] * gap
     y = obs4.get_pos()[1] * gap
-    # obs4.image_side((obs4.return_center() + x,obs4.return_center() + y),math.radians(90),win)
 
     b4 = grid[17][17]
 
     obs5 = grid[10][16]
     x = obs5.get_pos()[0] * gap
     y = obs5.get_pos()[1] * gap
-    # obs5.image_side((obs5.return_center() + x,obs5.return_center() + y),math.radians(90),win)
 
     b5 = grid[12][16]
     obs = [obs1,obs2,obs3,obs4,obs5]
-    # for ob in obs:
-        # ob.make_barrier()
 
     count = 0
     image_cor = [b1,b2,b3,b4,b5]
+
     obstacles = []
     coordinates = []
     obstacles_coor = []
+
     for o in obs: 
         o.make_image()
         x = o.get_pos()[0] * gap
         y = o.get_pos()[1] * gap
         # -90 to 90
-        vector = Vector((x,y),90)
+        vector = State((x,y),90)
+        print(x,y)
         obstacles.append(vector)
         obs_coor = (x,y)
         obstacles_coor.append(obs_coor)
@@ -497,7 +490,7 @@ def main(win,width):
     x = startpos[0] * gap
     y = startpos[1] * gap
 
-    source = State(x,y,90,None)
+    # source = State((x,y),90)
     pathCost = 0
 
     TURN_RADIUS = 30
@@ -524,10 +517,6 @@ def main(win,width):
     lasttime = pygame.time.get_ticks()
     moveGridDistance = 0.02 * 3779.52
     count = 0
-    # vectors = robot.turnRight()
-    
-
-    # temp_x, temp_y = robot.move90()
 
     check = True
     check1 = True
@@ -535,9 +524,12 @@ def main(win,width):
     while run: 
 
         draw(win,grid,ROWS,width)
+        c_x,c_y = generateCenterPoint(obs_coor[0])
+        obs_new = State((c_x,c_y),90)
+        robot.move(robot,obs_new)
         # if(robot.x <= 500):
             # robot.move_straight()s
-        robot.robot_move((generateCenterPoint(obs_coor[0])))
+        # robot.robot_domove((generateCenterPoint(obs_coor[0])))
         # print((generateCenterPoint(obs_coor[0])))
         for i in range(0,5):
             draw_vector(coor[i][0],coor[i][1],win) 

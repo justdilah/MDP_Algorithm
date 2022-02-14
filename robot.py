@@ -10,10 +10,10 @@ from testing_sf import RRTGraph
 from testing_sf import RRTMap
 import numpy as np
 
-DIRECTION_MARGIN_OF_ERROR = 1
+
 # 30 - 10 cm 
 # 60 - 20 cm - Turning Radius 
-TURNING_RADIUS = 60
+
 
 class State:
     def __init__(self,x,y,face_direction,prev_state):
@@ -23,6 +23,8 @@ class State:
         self.prev_state = prev_state
 
 class Robot:
+    TURNING_RADIUS = 60
+    DIRECTION_MARGIN_OF_ERROR = 1
     def __init__(self,startpos,robotImg,width,win):
 
         #metres to pixels 

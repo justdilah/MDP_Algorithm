@@ -524,12 +524,12 @@ def main(win,width):
     while run: 
 
         draw(win,grid,ROWS,width)
-        c_x,c_y = generateCenterPoint(obs_coor[0])
-        obs_new = State((c_x,c_y),90)
-        robot.move(robot,obs_new)
+        # c_x,c_y = generateCenterPoint(obs_coor[0])
+        # obs_new = State((c_x,c_y),90)
+        # robot.move(robot,obs_new)
         # if(robot.x <= 500):
             # robot.move_straight()s
-        # robot.robot_domove((generateCenterPoint(obs_coor[0])))
+        robot.robot_domove((generateCenterPoint(obs_coor[0])))
         # print((generateCenterPoint(obs_coor[0])))
         for i in range(0,5):
             draw_vector(coor[i][0],coor[i][1],win) 
@@ -620,7 +620,7 @@ def main(win,width):
         #     robot.move_forward(dt)
         # print(temp_x)
         robot.draw(win)
-        robot.robot_frame((robot.x,robot.y), robot.theta)
+        # robot.robot_frame((robot.x,robot.y), robot.theta)
 
         
         # y = new_y

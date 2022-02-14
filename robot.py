@@ -1,3 +1,4 @@
+from os import curdir
 from tkinter import CENTER
 import pygame
 import math
@@ -9,6 +10,10 @@ from testing_sf import RRTGraph
 from testing_sf import RRTMap
 import numpy as np
 
+DIRECTION_MARGIN_OF_ERROR = 1
+# 30 - 10 cm 
+# 60 - 20 cm - Turning Radius 
+TURNING_RADIUS = 60
 
 class State:
     def __init__(self,x,y,face_direction,prev_state):
@@ -16,14 +21,6 @@ class State:
         self.y = y
         self.face_direction = face_direction 
         self.prev_state = prev_state
-
-MAX_TURNING_ANGLE = 35.94
-THETA_WHEELS_DEGREE = 0
-directionInDegrees = -90
-TURNING_RADIUS = 40
-TURNING_ANGLE_DEGREE = 0
-thetaWheelsDegree = 0
-CHECK = True
 
 class Robot:
     def __init__(self,startpos,robotImg,width,win):
@@ -41,18 +38,13 @@ class Robot:
         self.delta_ang = math.pi/180
         self.check = True
         self.text ="turnright"
-        angleChangePerClick = 5
+        self.movementList = []
+        self.directionList = []
+        self.distanceList = []
+        self.gap = 30
+
 
         self.theta = 0
-        camera_orientation = self.theta + math.radians(90)
-
-        self.vl = 0.01 * self.m2p 
-        self.vr = 0.01 * self.m2p
-
-        self.maxspeed = 0.02 * self.m2p
-        self.minspeed =-0.02 * self.m2p
-
-        MAX_TURNING_RADIUS = abs(self.distanceBetweenFrontBackWheels / math.tan(math.radians(MAX_TURNING_ANGLE)))
 
         self.img = pygame.image.load(robotImg)
 
@@ -80,12 +72,19 @@ class Robot:
         self.theta = theta
 
     
-    def move_straight(self):
+    def move_forward(self):
         moveGridDistance = 0.5
         self.x = self.x + moveGridDistance * (math.cos(math.radians(self.theta)))
         self.y = self.y - (moveGridDistance * (math.sin(math.radians(self.theta))))
         self.rotated = pygame.transform.rotozoom(self.img,math.degrees(0),1)
-        self.rect = self.rotated.get_rect(center=(self.x,self.y))       
+        self.rect = self.rotated.get_rect(center=(self.x,self.y))  
+
+    def move_backwards(self):
+        moveGridDistance = -0.5
+        self.x = self.x + (moveGridDistance * (math.cos(math.radians(self.theta))))
+        self.y = self.y - (moveGridDistance * (math.sin(math.radians(self.theta))))
+        self.rotated = pygame.transform.rotozoom(self.img,math.degrees(0),1)
+        self.rect = self.rotated.get_rect(center=(self.x,self.y))  
 
     def robot_domove(self,endstate):
         x = self.x
@@ -93,7 +92,7 @@ class Robot:
         
         if x <= 405:
             if(self.text == "turnright"):
-                self.move_straight()
+                self.move_backwards()
             else:
                 if self.text == "turnrightupmore":
                     if(self.angleDegrees <= 90):
@@ -139,17 +138,6 @@ class Robot:
             
             elif self.text == "turnrightupmore":
                 pass
-
-    def move(self,initstate,endstate):
-        # robot_fd = self.expected_face_direction(endstate)
-
-        if(initstate.x < endstate.x):
-            self.move_straight()
-        elif(initstate.x > endstate.x):
-            self.turnRight_bottomleft(self.x,self.y)
-        else:
-            self.turnRight(self.x,self.y)
-
                 
     def expected_face_direction(obstacle):
         if (obstacle.face_direction == 90):
@@ -160,21 +148,7 @@ class Robot:
             return 180
         elif (obstacle.face_direction == 0):
             return 270
-        # return (obstacle.face_direction + 180) % 360
-            
-    
-    def move90(self,dt):
-            self.vl=0.035 * self.m2p
-            self.x+=((self.vl+self.vr)/2)*math.cos(self.theta) *dt
-            self.y-=((self.vl+self.vr)/2)*math.sin(self.theta) *dt
-            self.theta+=(self.vr - self.vl) / self.w *dt
-
-            self.rotated = pygame.transform.rotozoom(self.img,math.degrees(self.theta),1)
-            self.rect = self.rotated.get_rect(center=(self.x,self.y))
-
-            return self.x,self.y
-
-        
+                    
     class Vertex:
         def __init__(self,x,y):
             self.x = x 
@@ -185,8 +159,8 @@ class Robot:
         if self.angleDegrees >= 0:
             self.angleDegrees = self.angleDegrees - 0.5
             self.theta-=0.5
-            x = (x) + round(60 * math.cos(math.radians(self.angleDegrees)),2)
-            y = (y+60) - round(60 * math.sin(math.radians(self.angleDegrees)),2)
+            x = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y+TURNING_RADIUS) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))
             print("dadsa")
@@ -198,8 +172,8 @@ class Robot:
         if self.angleDegrees <= 90:
             self.theta+=0.5
             self.angleDegrees = self.angleDegrees + 0.5
-            x = (self.x+60) - round(60 * math.cos(math.radians(self.angleDegrees)),2)
-            y = (self.y) - round(60 * math.sin(math.radians(self.angleDegrees)),2)
+            x = (self.x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (self.y) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
             print(x)
             print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
@@ -214,8 +188,8 @@ class Robot:
         if self.angleDegrees >= -90:
             self.theta-=0.5
             self.angleDegrees = self.angleDegrees - 0.5
-            x = (x-60) + round(60 * math.cos(math.radians(self.angleDegrees)),2)
-            y = (y) - (round(60 * math.sin(math.radians(self.angleDegrees)),2))
+            x = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2))
             # print(x)
             # print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
@@ -228,138 +202,236 @@ class Robot:
         if self.angleDegrees <= 0:
             self.theta+=0.5
             self.angleDegrees = self.angleDegrees + 0.5
-            x = (x) - round(60 * math.cos(math.radians(self.angleDegrees)),2)
-            y = (y-60) - round(60 * math.sin(math.radians(self.angleDegrees)),2)
+            x = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y-TURNING_RADIUS) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
             print(x)
             print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))  
         return x,y  
 
-class ActionStraight: 
-        def __init__(self,travelDistGrid):
-            self.travelDistGrid = travelDistGrid
-            self.cost = 1
-        
-        def takeAction(self,initstate):
-            moveGridDistance = self.travelDistGrid
-            x = initstate.x
-            y = initstate.y
+    def move(self,initstate,endstate):
+        # robot_fd = self.expected_face_direction(endstate)
 
-            x += moveGridDistance*(int)(math.cos(initstate.face_direction))
-            y -= moveGridDistance*(int)(math.sin(initstate.face_direction))
-            # print(x,y)
-            state = State(x,y,initstate.face_direction,initstate)
-            return state
+        if(initstate.x < endstate.x):
+            self.move_straight()
+        elif(initstate.x > endstate.x):
+            self.turnRight_bottomleft(self.x,self.y)
+        else:
+            self.turnRight(self.x,self.y)
 
-class ActionTurn90Right:
-    def __init__(self):
-        self.travelDistGrid = 0.05
-        self.cost = 1
+    def addToQueue(self,command,direction,distance):
+        self.movementList.append(command)
+        self.directionList.append(direction)
+        self.distanceList.append(distance)
 
-    def takeAction(self,initstate):  
-        faceDirection = math.degrees(initstate.face_direction)
-        x = initstate.x
-        y = initstate.y
-
-        if faceDirection == 0:
-            x+=90
-            y+=90
-        elif faceDirection == 90:
-            x+=90
-            y-=90
-        elif faceDirection == 180:
-            x-=90
-            y-=90
-        elif faceDirection == 270:
-            x-=90
-            y+=90
-
-        faceDirection = (faceDirection - 90 + 360) % 360
-        endState = State(x,y,faceDirection,initstate)
-        # print(x)
-        return endState
-
-class ActionTurn90Left: 
-    def __init__(self):
-        self.travelDistGrid = 0.05
-        self.cost = 1
-        
-    def takeAction(self,initstate):
-        faceDirection = math.degrees(initstate.face_direction)
-        x = initstate.x
-        y = initstate.y
-
-        if faceDirection == 0:
-            x+=90
-            y-=90
-        elif faceDirection == 90:
-            x-=90
-            y-=90
-        elif faceDirection == 180:
-            x-=90
-            y+=90
-        elif faceDirection == 270:
-            x-=90
-            y+=90
-
-        faceDirection = (faceDirection + 90 + 360) % 360
-        endState = State(x,y,faceDirection,initstate)
-        return endState
-
-class ActionReverse90right:
-    def __init__(self):
-        self.travelDistGrid = 0.05
-        self.cost = 1
-
-    def takeAction(self,initstate):
-        faceDirection = math.degrees(initstate.face_direction)
-        x = initstate.x
-        y = initstate.y
-
-        if faceDirection == 0:
-            x-=90
-            y+=90
-        elif faceDirection == 90:
-            x+=90
-            y+=90
-        elif faceDirection == 180:
-            x+=90
-            y-=90
-        elif faceDirection == 270:
-            x+=90
-            y-=90
-
-        faceDirection = (faceDirection + 90 + 360) % 360
-        endState = State(x,y,faceDirection,initstate)
-        return endState
-
-# class ActionReverse90left:
-#     def __init__(self):
-#         self.travelDistGrid = 0.05
-#         self.cost = 1
-
-#     def takeAction(self,initstate):
-#         faceDirection = math.degrees(initstate.face_direction)
-#         x = initstate.x
-#         y = initstate.y
-
-#         if faceDirection == 0:
-#             x-=90
-#             y-=90
-#         elif faceDirection == 90:
-#             x-=90
-#             y+=90
-#         elif faceDirection == 180:
-#             x+=90
-#             y+=90
-#         elif faceDirection == 270:
-#             x-=90
-#             y-=90
-
-#         faceDirection = (faceDirection - 90 + 360) % 360
-#         endState = State(x,y,faceDirection,initstate)
-#         return endState
+    def getDirection(curDirection):
+        if(curDirection == 0):
+            return 'E'
+        elif(curDirection == 90):
+            return 'N'
+        elif(curDirection == 180):
+            return 'W'
+        elif(curDirection == 270):
+            return 'S'
+        return None
+    
+    def getRelativeDirection(self,robot,dest):
+        twoTurnDistance = 2*TURNING_RADIUS
+        if(-self.gap //2 <= dest.x) and (self.gap // 2 >= dest.x):
+            if(dest.y <=0):
+                return "RIGHT"
+            elif (dest.y <=0):
+                return "BACK"
+        elif (-twoTurnDistance >= dest.y):
+            if (dest.x <= twoTurnDistance and dest.x >= 0):
+                return "FRONT_SLIGHT_RIGHT"
+            elif (dest.x >= -twoTurnDistance and dest.x <= 0):
+                return "FRONT_SLIGHT_LEFT"
+            elif (dest.getX() >= 0):
+                return "FRONT_RIGHT"
+            elif (dest.getX() <= 0):
+                return "FRONT_LEFT"
+        elif (twoTurnDistance <= dest.y):
+            # // point is behind
+            if (dest.x <= twoTurnDistance and dest.x >= 0):
+                # // difference between x less than two turn
+                return "BACK_SLIGHT_RIGHT"
+            elif (dest.x >= -twoTurnDistance and dest.x <= 0):
+                return "BACK_SLIGHT_LEFT"
+            elif (dest.x >= 0):
+                return "BACK_RIGHT"
+            elif (dest.x <= 0):
+                return "BACK_LEFT"
+            
+        elif (abs(dest.y) < twoTurnDistance):
+            # // within the 2 turn margin of front and back
+            if (0 <= dest.x):
+                return "CENTER_RIGHT"
+            elif (0 >= dest.x):
+                return "CENTER_LEFT"
             
 
+        
+            
+
+        
+
+    def addCommand(self,command):
+        c = command.charAt(0)
+        other = []
+        # double dist;
+        currDirection = self.theta
+        # Direction dir = Direction.NONE;
+
+        if c == "w":
+    
+            # what it seems is that, the programmer concatenate the command and the dist together
+            # other = new char[10];
+            # command.getChars(1, command.length(), other, 0);
+            # dist = Double.parseDouble(new String(other)) * this.ENVIRONMENT_SCALING_FACTOR;
+            # this.getDurationForManeuver(dist) - dist/speed
+            # dist - is the real distance
+            # this.addToQueue("Forward", this.getDurationForManeuver(dist), Direction.NONE, dist);
+            self.addToQueue("Forward",0,None,None)
+        elif c == "s":
+            self.addToQueue("Reverse", 0, None, None)
+        elif c == 'a':
+            dir = self.getDirection(currDirection)
+    
+            self.addToQueue("Left", 1, None, -1)
+            self.addToQueue("LF", 1000, dir, -1)
+            self.addToQueue("Center", 1, None, -1)
+        elif c == 'd':
+            dir = self.getDirection(currDirection)
+            
+            self.addToQueue("Right", 1, None, -1)
+            self.addToQueue("RF", 1000, dir, -1)
+            self.addToQueue("Center", 1, None, -1)
+
+    def printGeneratedMovements(self):
+        for i in range(0,len(self.movementList)):
+            print("================================")
+            print(self.movementList[0])
+            print(self.directionList[0])
+            print("================================")
+
+    def getEuclideanDistance(a, b):
+        return math.sqrt(math.pow(abs(a.x - b.x), 2) + math.pow(abs(a.y - b.y), 2))
+    
+    
+    #can use this function to straighten the car after a turn
+    def getCurrentDirection(self):
+        if (abs(self.angleDegrees - (-90)) <= DIRECTION_MARGIN_OF_ERROR):
+            return 'N'
+        elif (abs(self.angleDegrees - (90)) <= DIRECTION_MARGIN_OF_ERROR):
+            return 'S'
+        elif (abs(self.angleDegrees) <= DIRECTION_MARGIN_OF_ERROR):
+            return 'E'
+        elif (abs(self.angleDegrees - 180) <= DIRECTION_MARGIN_OF_ERROR
+                or abs(self.angleDegrees - (-180)) <= DIRECTION_MARGIN_OF_ERROR):
+            return 'W'
+        return None
+
+    # def generateMovements(plannedPath, orderedObsIds) {
+    #     this.movementQueue.clear();
+    #     this.durationQueue.clear();
+    #     this.directionQueue.clear();
+    #     this.distanceQueue.clear();
+    #     boolean justTurned = false;
+    #     double dist;
+    #     int obsCounter = 0;
+    #     for (int i = 1; i < plannedPath.size(); i++) {
+    #         MyPoint src = plannedPath.get(i - 1);
+    #         MyPoint dest = plannedPath.get(i);
+    #         if (dest.getDirection() == Direction.NONE) {
+    #             this.addToQueue("Reached", 1, Direction.NONE,
+    #                     orderedObsIds[obsCounter] * this.ENVIRONMENT_SCALING_FACTOR);
+    #             obsCounter++;
+    #             continue;
+    #         }
+    #         if (src.getDirection() == Direction.NONE) {
+    #             src = plannedPath.get(i - 2);
+    #         }
+    #         switch (this.getRelativeOrientation(src, dest)) {
+    #             case NORTH:
+    #                 dist = this.getEuclideanDistance(src, dest);
+    #                 if (justTurned) {
+    #                     dist -= this.MAX_TURNING_RADIUS;
+    #                     justTurned = false;
+    #                 }
+    #                 switch (this.getRelativeDirection(src, dest)) {
+    #                     case BACK:
+    #                         if (dist > 0) {
+    #                             this.addToQueue("Reverse", this.getDurationForManeuver(dist), Direction.NONE, dist);
+    #                         } else {
+    #                             this.addToQueue("Forward", this.getDurationForManeuver(-dist), Direction.NONE, -dist);
+    #                         }
+    #                         justTurned = false;
+    #                         break;
+    #                     case FRONT:
+    #                         if (dist > 0) {
+    #                             this.addToQueue("Forward", this.getDurationForManeuver(dist), Direction.NONE, dist);
+    #                         } else {
+    #                             this.addToQueue("Reverse", this.getDurationForManeuver(-dist), Direction.NONE, -dist);
+    #                         }
+    #                         justTurned = false;
+    #                         break;
+    #                     case NONE:
+    #                         break;
+    #                     default:
+    #                         break;
+    #                 }
+    #                 break;
+    #             case SOUTH:
+    #                 // dist = this.getEuclideanDistance(src, dest);
+    #                 // this.addToQueue("Reverse", this.getDurationForManeuver(dist));
+    #                 break;
+    #             case EAST:
+    #                 dist = this.getEuclideanDistance(src, dest);
+    #                 dist -= this.MAX_TURNING_RADIUS;
+    #                 if (justTurned) {
+    #                     dist -= this.MAX_TURNING_RADIUS;
+    #                     justTurned = false;
+    #                 }
+    #                 if (dist > 0) {
+    #                     this.addToQueue("Forward", this.getDurationForManeuver(dist), Direction.NONE, dist);
+    #                 } else {
+    #                     this.addToQueue("Reverse", this.getDurationForManeuver(-dist), Direction.NONE, -dist);
+    #                 }
+    #                 this.addToQueue("Right", 1, Direction.NONE, -1);
+    #                 this.addToQueue("RF", 1000, dest.getDirection(), -1);
+    #                 this.addToQueue("Center", 1, Direction.NONE, -1);
+    #                 justTurned = true;
+    #                 break;
+    #             case WEST:
+    #                 dist = this.getEuclideanDistance(src, dest);
+    #                 dist -= this.MAX_TURNING_RADIUS;
+    #                 if (justTurned) {
+    #                     dist -= this.MAX_TURNING_RADIUS;
+    #                     justTurned = false;
+    #                 }
+    #                 if (dist > 0) {
+    #                     this.addToQueue("Forward", this.getDurationForManeuver(dist), Direction.NONE, dist);
+    #                 } else {
+    #                     this.addToQueue("Reverse", this.getDurationForManeuver(-dist), Direction.NONE, -dist);
+    #                 }
+    #                 this.addToQueue("Left", 1, Direction.NONE, -1);
+    #                 this.addToQueue("LF", 1000, dest.getDirection(), -1);
+    #                 this.addToQueue("Center", 1, Direction.NONE, -1);
+    #                 justTurned = true;
+    #                 break;
+    #             case NONE:
+    #                 break;
+    #             default:
+    #                 break;
+
+    #         }
+
+    #     }
+    # }
+    
+    
+    
+        
         

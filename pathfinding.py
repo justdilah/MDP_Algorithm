@@ -363,6 +363,8 @@ def obstacles(start,grid,gap,win):
     
     nodes = PriorityQueue()
     ori = PriorityQueue()
+
+    #obs1 
     obs1 = grid[13][3]
     x = obs1.get_pos()[0] * gap
     y = obs1.get_pos()[1] * gap
@@ -439,10 +441,14 @@ def random_orientation():
 #compare 2 spots postions and determine the robot orientation
 def compare(pos,pos2):
     # print(pos[0],pos2[0])
+    
+    #x coordinate
     if(pos[0] < pos2[0]):
         return 0
     elif (pos[0] > pos2[0]):
         return 180
+
+    #y coordinate
     if (pos[1] > pos2[1]):
         return 90
     elif (pos[1] < pos2[1]):
@@ -493,11 +499,11 @@ def main(win,width):
     # source = State((x,y),90)
     pathCost = 0
 
-    TURN_RADIUS = 30
-    TURN_RADIUS_GRID = (int)(TURN_RADIUS//gap)
-    MAX_IMAGE_VIEW_DISTANCE = 30
-    MAX_IMAGE_VIEW_DISTANCE_GRID = (int)(MAX_IMAGE_VIEW_DISTANCE//gap)
-    TURN_ON_SPOT_RADIUS = 20
+    # TURN_RADIUS = 30
+    # TURN_RADIUS_GRID = (int)(TURN_RADIUS//gap)
+    # MAX_IMAGE_VIEW_DISTANCE = 30
+    # MAX_IMAGE_VIEW_DISTANCE_GRID = (int)(MAX_IMAGE_VIEW_DISTANCE//gap)
+    # TURN_ON_SPOT_RADIUS = 20
 
     
     # print(startpos)
@@ -515,143 +521,38 @@ def main(win,width):
     old = start.return_center() + x,start.return_center() + y
     new = old
     lasttime = pygame.time.get_ticks()
-    moveGridDistance = 0.02 * 3779.52
-    count = 0
-
-    check = True
-    check1 = True
+    robot.setAngleDegrees(robot.theta)
+    nx = 0
+    ny = 0
 
     while run: 
 
         draw(win,grid,ROWS,width)
-        # c_x,c_y = generateCenterPoint(obs_coor[0])
-        # obs_new = State((c_x,c_y),90)
-        # robot.move(robot,obs_new)
-        # if(robot.x <= 500):
-            # robot.move_straight()s
-        robot.robot_domove((generateCenterPoint(obs_coor[0])))
-        # print((generateCenterPoint(obs_coor[0])))
+        # robot.robot_domove((generateCenterPoint(obs_coor[0])),"Left")
+
         for i in range(0,5):
             draw_vector(coor[i][0],coor[i][1],win) 
             c_x,c_y = generateCenterPoint(obs_coor[i])
             draw_vector(c_x,c_y,win)
-        # pygame.draw.line(win,RED,old,new,3)   
-                
-        # new_y = (start.return_center() + y) + moveGridDistancSe*(math.sin(math.pi/180*0))
-        # print(new_y)
+
         dt = (pygame.time.get_ticks()-lasttime) / 1000
         lasttime = pygame.time.get_ticks()
-        # ((self.vl+self.vr)/2)*math.cos(self.theta)*dt
-        # print(((moveGridDistance+moveGridDistance)/2) * math.cos(math.radians(0))) * dt
-        # new_x = robot.x + 2 * dt
-        # new_y = robot.y + 4 * math.radians(90) / abs(math.radians(90)) *dt
-        # theta = robot.theta
-        # robot.set_theta(robot.theta + (theta + 1) % 4)
-        # print(robot.theta + math.atan2(new_x,new_y))
 
-        # fl_x,fl_y = robot.move_forward_90_left()
-        # draw_vector(fl_x,fl_y,win)
-        # fr_x,fr_y = robot.move_forward_90_right()
-        # draw_vector(fr_x,fr_y,win)
-        # rr_x,rr_y = robot.move_reverse_90_right()
-        # draw_vector(rr_x,rr_y,win)
-        # rl_x,rl_y = robot.move_reverse_90_left()
-        # draw_vector(rl_x,rl_y,win)
-        # turnangle = 0 + 360
-
-        #  robot.set_theta(math.atan2(x,y))
-        # new_x = robot.x + moveGridDistance*(math.cos(math.radians(90) + robot.theta)) * dt
-
-        # new_y = robot.y + moveGridDistance*(math.sin(math.radians(90) + robot.theta)) * dt
-        # new_y = robot.y + moveGridDistance*(math.sin(math.radians(90))) * dt
-        # print(new_x)
-        # print(new_y)
-
-        # robot.set_theta(robot.x / robot.y * dt)
-        # new_x = robot.x + moveGridDistance*(math.cos(math.radians(0))) * dt
-
-        # print(new_x)
-        # print(y)
-        # # # print(new_x)
-        # for i in range(0,200):
-        #     draw_vector(vectors[i][0],vectors[i][1],win)
-        # draw_vector(temp_x,temp_y,win)
-        # print(math.degrees(robot.theta))
-        # if robot.theta >= math.radians(-90):
-        #     robot.move(dt)
-        #     print(math.degrees(robot.theta))
-        # else: 
-
-        #find the difference
-        # if(robot.theta >= math.radians(-90)):
-                # move_x,move_y = robot.move(dt)
         
-        # if check == True:
-            # robot.move_90()
-            # check = False
-        # if count <= 30:
-        #     robot.move_straight()
-        #     count+=1
-        #     temp_x, temp_y = robot.move90(dt)
-        #     store_x = temp_x
-        #     store_y = temp_y
-        #     check == False
-        #     draw_vector(temp_x,temp_y,win)
-        # draw_vector(store)
-        # draw_vector(temp_x,temp_y,win)
-       
-        # if(robot.x >= 230):
-        #     if(robot.theta >= math.radians(-90)):
-        #         robot.move90(dt)
-        # else:
-        #     robot.move_straight()
-                # move_x,move_y = robot.move(dt)
-            # else:
-                # if check1 == True:
-                    # print(move_x-store_x)
-                    # print(move_y-store_y)
-                    # check1 = False
-                
-                
-        #         # print(move_y)
-
-        # elif (temp_x > 300):
-        #     print(move_x)
-        #     robot.move_forward(dt)
-        # print(temp_x)
+        # nx,ny = robot.turnRightN(robot.theta,robot.x,robot.y,nx,ny)
+        nx,ny = robot.turnLeftN(robot.theta,robot.x,robot.y,nx,ny)
+    
         robot.draw(win)
-        # robot.robot_frame((robot.x,robot.y), robot.theta)
+        robot.robot_frame((robot.x,robot.y),robot.theta)
 
-        
-        # y = new_y
-        # x = new_x
-        # print(x)
-        # start.image_side((start.return_center() + x,start.return_center() + y),90,win)
-        
-        
-        
+
+    #------------------------------------------Previous A*-----------------------------------------
         # # loop through the event 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
             start.make_start()
-
-        #     if pygame.mouse.get_pressed()[0]: #press on the left mouse button 
-        #         pass
-            
-        #     elif pygame.mouse.get_pressed()[2]: #press on the right mouse button 
-        #         pos = pygame.mouse.get_pos()
-        #         #actual spot
-        #         row, col = get_clicked_pos(pos,ROWS,width)
-        #         spot = grid[row][col]
-        #         spot.reset()
-
-        #         if spot == start:
-        #             start = None
-        #         elif spot == end:
-        #             end = None
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and start:
                     for row in grid:
@@ -661,13 +562,6 @@ def main(win,width):
                     #number of nodes 
                     for i in range(0,1):
                         temp = nodes.get()[1]
-                        # orientation = ori.get()[1]
-                    
-                        # robot_orientation.append(orientation)
-                        # print("shit")
-                        # print(source)
-                        good = search(source,many_obs[i],pathCost,None)
-                        # print("dasda")
                         paths.append(algorithm(win,ROWS,width,grid,start,temp))
                         start = temp
        
@@ -700,56 +594,30 @@ def main(win,width):
 
                     theta = 0 
                     index-=1
+                    print(tracker)
                     test = tracker[index]
                     track = 0
                     # theta = robot_orientation[track]
                     
-
+                    #checks if the stack is empty 
                     while stack:   
                         if test < 0:
                             track+=1
                             index-=1    
                             test = tracker[index]
-                            # print(test)
-                            # theta = robot_orientation[track]
 
                         pos = stack.pop()
-                        
                         pos.make_yellow()
                         test-=1    
-                    
-                        # robotpos = pos.get_pos()
-                        # x1 = robotpos[0] * gap
-                        # y1 = robotpos[1] * gap
-                        # sleep(1)
-                        # robot.move(pos.return_center() + x1,pos.return_center() + y1) 
-                        # old = (pos.return_center() + x1,pos.return_center() + y1)
+    
 
                         if stack:
                             pos2 = stack.pop()
                             pos2.make_yellow()
                             test-=1    
-                            # robotpos2 = pos2.get_pos()
-                            # x2 = robotpos2[0] * gap
-                            # y2 = robotpos2[1] * gap
-                            # if test < 0: 
-                            #     robot.set_theta(theta)
-                            # else: 
-                            #     robot.set_theta(compare(pos.get_pos(),pos2.get_pos()))
-                            # robot.move(pos2.return_center() + x2,pos2.return_center() + y2) 
-                            
                             end = pos2
 
                         else:
-                            # if test <= 1:
-                                # robot.set_theta(theta)
-                                # print(theta)
-                            # else:
-                                # robot.set_theta(compare(pos.get_pos(),pos2.get_pos()))
-                            # sleep(1)
-                            # robot.move(pos.return_center() + x1,pos.return_center() + y1) 
-                            # new = (pos2.return_center() + x2,pos2.return_center() + y2)
-                            # pygame.draw.line(win,RED,old,new,3)
                             end = pos             
 
                     start.make_start()

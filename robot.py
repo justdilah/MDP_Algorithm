@@ -38,17 +38,18 @@ class Robot:
         self.x_store = 0
         self.y_store = 0
         self.map = win
-        self.angleDegrees = 90
+        self.angleDegrees = -90
         self.delta_ang = math.pi/180
         self.check = True
-        self.text ="turnright"
+        self.text ="turnleft"
         self.movementList = []
         self.directionList = []
         self.distanceList = []
         self.gap = 30
+        self.maxTurningAngle = 0
 
 
-        self.theta = 0
+        self.theta = 90
 
         self.img = pygame.image.load(robotImg)
 
@@ -60,10 +61,189 @@ class Robot:
     def draw(self,map):
         map.blit(self.rotated,self.rect)
     
-    def move90(self):
-        pass
+    #------------------- Set Angle in the Circle ------------------------------------------------
+
+    #Left
+    def setAngleDegrees(self,face_direction):
+        if face_direction == 90:
+            self.angleDegrees = 0
+
+        elif face_direction == 0:
+            self.angleDegrees = -90
+
+        elif face_direction == 180:
+            self.angleDegrees = -90
+
+        elif face_direction == 270:
+            self.angleDegrees = 0
+
+    #Right
+    def setAngleDegrees(self,face_direction):
+        if face_direction == 90:
+            self.angleDegrees = 0
+
+        elif face_direction == 0:
+            self.angleDegrees = -90
+
+        elif face_direction == 180:
+            self.angleDegrees = -90
+
+        elif face_direction == 270:
+            self.angleDegrees = 0
+
+    #------------------- Turn Forward ------------------------------------------------------------
+
+    def turnRightN(self,face_direction,x,y,nx,ny):
+        if face_direction == 90:
+            self.maxTurningAngle = 90
+            if self.angleDegrees <= 90:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                print(nx)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+        
+        elif face_direction == 270:
+            self.maxTurningAngle = -90
+            if self.angleDegrees >= -90:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+        
+        elif face_direction == 180:
+            self.maxTurningAngle = 0
+            if self.angleDegrees <= 0:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+
+        elif face_direction == 0:
+            self.maxTurningAngle == 0
+            self.angleDegrees = abs(self.angleDegrees)
+            if self.angleDegrees >= 0:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y+TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+        self.rect = self.rotated.get_rect(center=(nx,ny))
+        return nx,ny  
+
+    def turnLeftN(self,face_direction,x,y,nx,ny):
+        if face_direction == 90:
+            self.maxTurningAngle = 90
+            if self.angleDegrees <= 90:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+        
+        elif face_direction == 270:
+            self.maxTurningAngle = -90
+            if self.angleDegrees >= -90:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+        
+        elif face_direction == 180:
+            self.maxTurningAngle = 0
+            print(self.angleDegrees)
+            self.angleDegrees = abs(self.angleDegrees)
+            if self.angleDegrees >= 0:
+                
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y+TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+
+        elif face_direction == 0:
+            self.maxTurningAngle == 0
+            if self.angleDegrees <= 0:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+        self.rect = self.rotated.get_rect(center=(nx,ny))
+        return nx,ny 
+
+    # def doTurn(self,x,y,face_direction):
+    #     if(self.maxTurningAngle <= 90):
+
+
+
+    #------------------- Turn Backwards -----------------------------------------------------------
+
+    def turnReverseRight(self,face_direction,x,y,nx,ny):
+
+        if face_direction == 90:
+            self.maxTurningAngle = -90
+            if self.angleDegrees >= -90:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        elif face_direction == 270:
+            self.maxTurningAngle = 90
+            if self.angleDegrees >= -90:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        elif face_direction == 180:
+            self.maxTurningAngle = 0
+            if self.angleDegrees <= 0:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+
+        elif face_direction == 0:
+            self.maxTurningAngle == 0
+            if self.angleDegrees >= 0:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y+TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2))
+
+        self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+        self.rect = self.rotated.get_rect(center=(nx,ny))
+        return nx,ny  
+
+    def turnReverseLeft(self,face_direction,x,y,nx,ny):
+
+        if face_direction == 90:
+            self.maxTurningAngle = -90
+            if self.angleDegrees >= -90:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        elif face_direction == 270:
+            self.maxTurningAngle = 90
+            if self.angleDegrees <= 90:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        elif face_direction == 180:
+            self.maxTurningAngle = 0
+            if self.angleDegrees >= 0:
+                self.angleDegrees = self.angleDegrees - 0.5
+                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+
+        elif face_direction == 0:
+            self.maxTurningAngle == 0
+            if self.angleDegrees <= 0:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+        
+        self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+        self.rect = self.rotated.get_rect(center=(nx,ny))
+        return nx,ny 
 
     def robot_frame(self,pos,rotation):
+        rotation = math.radians(rotation)
         n = 80
         centerx,centery=pos
         x_axis=(centerx + n*math.cos(-rotation),centery + n*math.sin(-rotation))
@@ -90,22 +270,55 @@ class Robot:
         self.rotated = pygame.transform.rotozoom(self.img,math.degrees(0),1)
         self.rect = self.rotated.get_rect(center=(self.x,self.y))  
 
-    def robot_domove(self,endstate):
+    
+
+    def robot_domove(self,endstate,turn):
+        if turn == "Right":
+            self.turnRightFullCircle(endstate)
+        elif turn == "Left":
+            self.turnLeftFullCircle(endstate)
+                        
+    
+    def expected_face_direction(obstacle):
+        if (obstacle.face_direction == 90):
+            return 0
+        elif (obstacle.face_direction == 180):
+            return 90
+        elif (obstacle.face_direction == 270):
+            return 180
+        elif (obstacle.face_direction == 0):
+            return 270
+
+    #------------------------------------- Full Circle turn right ------------------------------------------
+
+    def turnRightFullCircle(self,endstate):
         x = self.x
-        y = self.y 
-        
-        if x <= 405:
+        y = self.y
+
+        if x <= endstate[0]:
             if(self.text == "turnright"):
                 self.move_forward()
-            else:
-                if self.text == "turnrightupmore":
+            elif self.text == "turnrightupmore":
                     if(self.angleDegrees <= 90):
                         self.x_store,self.y_store = self.turnRight_up(x,y)
+            elif self.text == "turnrightup":
+                print(self.theta)
+                if(self.angleDegrees <= 0):
+                    if(self.check == True):
+                        self.x_store,self.y_store = self.turnRight_bottomleft(x,y)
+                else: 
+                    if self.check == True:
+                        self.x = self.x_store
+                        self.y = self.y_store
+                        x = self.x
+                        y = self.y
+                        self.check = False
+                        self.text = "turnrightupmore"
         else:
             if self.text == "turnright":
                 if(self.angleDegrees >= 0):
-                    if y <= 105:
-                        self.x_store,self.y_store = self.turnRight(x,y)
+                    # if y <= endstate[1]:
+                    self.x_store,self.y_store = self.turnRight(x,y)
                 else:
                     if self.check == True:
                         self.x = self.x_store
@@ -127,37 +340,6 @@ class Robot:
                         self.check = True
                         self.text = "turnrightup"
 
-            elif self.text == "turnrightup":
-                if(self.angleDegrees <= 0):
-                    if(self.check == True):
-                        self.x_store,self.y_store = self.turnRight_bottomleft(x,y)
-                else: 
-                    if self.check == True:
-                        self.x = self.x_store
-                        self.y = self.y_store
-                        x = self.x
-                        y = self.y
-                        self.check = False
-                        self.text = "turnrightupmore"
-            
-            elif self.text == "turnrightupmore":
-                pass
-                
-    def expected_face_direction(obstacle):
-        if (obstacle.face_direction == 90):
-            return 0
-        elif (obstacle.face_direction == 180):
-            return 90
-        elif (obstacle.face_direction == 270):
-            return 180
-        elif (obstacle.face_direction == 0):
-            return 270
-                    
-    class Vertex:
-        def __init__(self,x,y):
-            self.x = x 
-            self.y = y
-
     def turnRight(self,x,y):
         #draws circle
         if self.angleDegrees >= 0:
@@ -167,7 +349,6 @@ class Robot:
             y = (y+TURNING_RADIUS) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))
-            print("dadsa")
         return x,y
 
     #bottom
@@ -178,8 +359,6 @@ class Robot:
             self.angleDegrees = self.angleDegrees + 0.5
             x = (self.x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
             y = (self.y) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
-            print(x)
-            print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))
             return x,y
@@ -187,32 +366,127 @@ class Robot:
 
     #bottom_right of the circle
     def turnRight_downright(self,x,y):
-        vectors = []
         #draws circle
         if self.angleDegrees >= -90:
             self.theta-=0.5
             self.angleDegrees = self.angleDegrees - 0.5
             x = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
             y = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2))
-            # print(x)
-            # print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))  
         return x,y  
 
     def turnRight_bottomleft(self,x,y):
+        
         #draws circle
-        # print("FUCK")
         if self.angleDegrees <= 0:
-            self.theta+=0.5
+            self.theta = abs(self.theta)
+            self.theta-=0.5
             self.angleDegrees = self.angleDegrees + 0.5
             x = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
             y = (y-TURNING_RADIUS) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
-            print(x)
-            print(y)
             self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
             self.rect = self.rotated.get_rect(center=(x,y))  
         return x,y  
+
+    #-------------------------------------- Full Circle turnleft -------------------------------------------
+
+    def turnLeftFullCircle(self,endstate):
+        x = self.x
+        y = self.y
+
+        if x <= endstate[0]:
+            if(self.text == "turnleft"):
+                self.move_forward()
+            elif self.text == "turnleftdownmore":
+                    if(self.angleDegrees >= -90):
+                        self.x_store,self.y_store = self.turnLeft_bottomright(x,y)
+            elif self.text == "turnleftdown":
+                print(self.theta)
+                if(self.angleDegrees >= 0):
+                    if(self.check == True):
+                        self.x_store,self.y_store = self.turnLeft_downleft(x,y)
+                else: 
+                    if self.check == True:
+                        self.x = self.x_store
+                        self.y = self.y_store
+                        x = self.x
+                        y = self.y
+                        self.check = False
+                        self.text = "turnleftdownmore"
+        else:
+            if self.text == "turnleft":
+                if(self.angleDegrees <= 0):
+                    # if y <= endstate[1]:
+                    self.x_store,self.y_store = self.turnLeft(x,y)
+                else:
+                    if self.check == True:
+                        self.x = self.x_store
+                        self.y = self.y_store
+                        x = self.x
+                        y = self.y
+                        self.check = False
+                        self.text = "turnleftup"
+            elif self.text == "turnleftup":
+                if(self.angleDegrees <= 90):
+                    if(self.check == False):
+                       self.x_store,self.y_store = self.turnLeft_up(x,y)
+                else: 
+                    if self.check == False:
+                        self.x = self.x_store
+                        self.y = self.y_store
+                        x = self.x
+                        y = self.y
+                        self.check = True
+                        self.text = "turnleftdown"
+
+    def turnLeft(self,x,y):
+        #draws circle
+        if self.angleDegrees <= 0:
+            self.theta+=0.5
+            self.angleDegrees = self.angleDegrees + 0.5
+            x = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2))
+            self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+            self.rect = self.rotated.get_rect(center=(x,y))  
+        return x,y  
+
+    #bottom
+    def turnLeft_up(self,x,y):
+        if self.angleDegrees <= 90:
+            self.angleDegrees = self.angleDegrees + 0.5
+            self.theta+=0.5
+            x = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
+            self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+            self.rect = self.rotated.get_rect(center=(x,y))
+        return x,y
+
+
+    #bottom_right of the circle
+    def turnLeft_downleft(self,x,y):
+        vectors = []
+        #draws circle
+        if self.angleDegrees >= 0:
+            self.theta+=0.5
+            self.angleDegrees = self.angleDegrees - 0.5
+            x = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y+TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2))
+            self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+            self.rect = self.rotated.get_rect(center=(x,y))  
+        return x,y  
+
+    def turnLeft_bottomright(self,x,y):
+        #draws circle
+        if self.angleDegrees >= -90:
+            self.theta+=0.5
+            self.angleDegrees = self.angleDegrees - 0.5
+            x = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            y = (y) - round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)
+            self.rotated = pygame.transform.rotozoom(self.img,self.theta,1)
+            self.rect = self.rotated.get_rect(center=(x,y))  
+        return x,y  
+
 
     def move(self,initstate,endstate):
         # robot_fd = self.expected_face_direction(endstate)
@@ -274,12 +548,6 @@ class Robot:
                 return "CENTER_RIGHT"
             elif (0 >= dest.x):
                 return "CENTER_LEFT"
-            
-
-        
-            
-
-        
 
     def addCommand(self,command):
         c = command.charAt(0)

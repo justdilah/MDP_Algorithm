@@ -1,6 +1,6 @@
-from cmath import cos, sin
-from pickle import FALSE
-from tkinter import W
+# from cmath import cos, sin
+# from pickle import FALSE
+# from tkinter import W
 import pygame
 import math
 # from algorithm_try import * 
@@ -539,12 +539,15 @@ def main(win,width):
         lasttime = pygame.time.get_ticks()
 
         
+    #------------------------------- Testing the Turning ------------------------------------------
+        
         # nx,ny = robot.turnRightN(robot.theta,robot.x,robot.y,nx,ny)
-        nx,ny = robot.turnLeftN(robot.theta,robot.x,robot.y,nx,ny)
+        # nx,ny = robot.turnLeftN(robot.theta,robot.x,robot.y,nx,ny)
+        # nx,ny = robot.turnReverseRight(robot.theta,robot.x,robot.y,nx,ny)
+        nx,ny = robot.turnReverseLeft(robot.theta,robot.x,robot.y,nx,ny)
     
         robot.draw(win)
         robot.robot_frame((robot.x,robot.y),robot.theta)
-
 
     #------------------------------------------Previous A*-----------------------------------------
         # # loop through the event 

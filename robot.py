@@ -1,14 +1,14 @@
-from os import curdir
-from tkinter import CENTER
+# from os import curdir
+# from tkinter import CENTER
 import pygame
 import math
 from time import *
 
 
 # from pathfinding import ActionStraight
-from testing_sf import RRTGraph
-from testing_sf import RRTMap
-import numpy as np
+# from testing_sf import RRTGraph
+# from testing_sf import RRTMap
+# import numpy as np
 
 
 # 30 - 10 cm 
@@ -184,9 +184,9 @@ class Robot:
 
         elif face_direction == 270:
             self.maxTurningAngle = 90
-            if self.angleDegrees >= -90:
-                self.angleDegrees = self.angleDegrees - 0.5
-                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+            if self.angleDegrees <= 90:
+                self.angleDegrees = self.angleDegrees + 0.5
+                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
                 ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
 
         elif face_direction == 180:
@@ -199,6 +199,7 @@ class Robot:
 
         elif face_direction == 0:
             self.maxTurningAngle == 0
+            self.angleDegrees = abs(self.angleDegrees)
             if self.angleDegrees >= 0:
                 self.angleDegrees = self.angleDegrees - 0.5
                 nx = (x) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
@@ -214,22 +215,23 @@ class Robot:
             self.maxTurningAngle = -90
             if self.angleDegrees >= -90:
                 self.angleDegrees = self.angleDegrees - 0.5
-                nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
-                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
 
         elif face_direction == 270:
             self.maxTurningAngle = 90
             if self.angleDegrees <= 90:
                 self.angleDegrees = self.angleDegrees + 0.5
-                nx = (x-TURNING_RADIUS) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
+                nx = (x+TURNING_RADIUS) - round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
                 ny = (y) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
 
         elif face_direction == 180:
             self.maxTurningAngle = 0
+            self.angleDegrees = abs(self.angleDegrees)
             if self.angleDegrees >= 0:
                 self.angleDegrees = self.angleDegrees - 0.5
                 nx = (x) + round(TURNING_RADIUS * math.cos(math.radians(self.angleDegrees)),2)
-                ny = (y-TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
+                ny = (y+TURNING_RADIUS) - (round(TURNING_RADIUS * math.sin(math.radians(self.angleDegrees)),2)) 
 
         elif face_direction == 0:
             self.maxTurningAngle == 0

@@ -68,19 +68,19 @@ class Robot:
     
     #------------------- Set Angle in the Circle ------------------------------------------------
 
-    #Left
-    def setAngleDegrees(self,face_direction):
-        if face_direction == 90:
-            self.angleDegrees = 0
+    # #Left
+    # def setAngleDegrees(self,face_direction):
+    #     if face_direction == 90:
+    #         self.angleDegrees = 0
 
-        elif face_direction == 0:
-            self.angleDegrees = -90
+    #     elif face_direction == 0:
+    #         self.angleDegrees = -90
 
-        elif face_direction == 180:
-            self.angleDegrees = -90
+    #     elif face_direction == 180:
+    #         self.angleDegrees = -90
 
-        elif face_direction == 270:
-            self.angleDegrees = 0
+    #     elif face_direction == 270:
+    #         self.angleDegrees = 0
 
     #Right
     def setAngleDegrees(self,face_direction):

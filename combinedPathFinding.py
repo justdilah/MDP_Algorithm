@@ -175,16 +175,17 @@ class Spot:
     def update_neighbors(self, grid):
 		#up down left right, if not barrier add into neighbours list
         self.neighbors = []
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier() and not grid[self.row + 1][self.col].is_vbarrier(): # DOWN
 			#spot is not in the last row, mark the spot under it as a neighbour unless is barrier
             self.neighbors.append(grid[self.row + 1][self.col])
             
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier() and not grid[self.row - 1][self.col].is_vbarrier(): # UP
             self.neighbors.append(grid[self.row - 1][self.col])
 
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier() and not grid[self.row][self.col + 1].is_vbarrier(): # RIGHT
             self.neighbors.append(grid[self.row][self.col + 1])
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+			
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier() and not grid[self.row][self.col - 1].is_vbarrier(): # LEFT
             self.neighbors.append(grid[self.row][self.col - 1])
             
 
@@ -204,45 +205,50 @@ def h(p1,p2):
     return abs(x1- x2) + abs(y1 - y2)
 
 def algorithm(draw, grid, start, end):
-    count = 0
-    open_set = PriorityQueue()
-    open_set.put((0, count, start)) #add to the priority queue start node with f score of 0
+	count = 0
+	open_set = PriorityQueue()
+	open_set.put((0, count, start)) #add to the priority queue start node with f score of 0
 	#count is for breaking ties
-    came_from = {} #what node did this node come from/keeping track of parents
-    g_score = {spot: float("inf") for row in grid for spot in row} #for every spot, initialise g score to inf
-    g_score[start] = 0 #start serves as an identifier
-    f_score = {spot: float("inf") for row in grid for spot in row}
-    f_score[start] = h(start.get_pos(), end.get_pos()) #distance to end node
-    open_set_hash = {start} #keeps track of items in the priority queue
-    while not open_set.empty():
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+	came_from = {} #what node did this node come from/keeping track of parents
+	g_score = {spot: float("inf") for row in grid for spot in row} #for every spot, initialise g score to inf
+	g_score[start] = 0 #start serves as an identifier
+	f_score = {spot: float("inf") for row in grid for spot in row}
+	f_score[start] = h(start.get_pos(), end.get_pos()) #distance to end node
 
-        current = open_set.get()[2] #grab the highest priority node
-        open_set_hash.remove(current) #remove from set that keeps track of whats in priority queue
-        if current == end: #found shortest path, make path
-            end.make_end()
-            return reconstruct_path(came_from, end, draw, start)
-			
-        for neighbor in current.neighbors: #go through list of neighbours for current spot
-            temp_g_score = g_score[current] + 1 #alt path from start to the neighbor node is +1 from current node
-            if temp_g_score < g_score[neighbor]: #update shortest path to neighbor
-                came_from[neighbor] = current #update parent of neighbor
-                g_score[neighbor] = temp_g_score
-                f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
-                if neighbor not in open_set_hash: #no duplicates in priority queue
-                    count += 1
-                    open_set.put((f_score[neighbor], count, neighbor))
-                    open_set_hash.add(neighbor)
-                    neighbor.make_open()
-                    
-        draw()
-        if current != start:
-            current.make_closed() #
-            
-    return None #if no path found
+	open_set_hash = {start} #keeps track of items in the priority queue
+
+	while not open_set.empty():
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+
+		current = open_set.get()[2] #grab the highest priority node
+		open_set_hash.remove(current) #remove from set that keeps track of whats in priority queue
+		
+		if current == end: 
+			end.make_end()
+			return reconstruct_path(came_from, end, draw, start)
+			# end.make_end()
+			# return True
+
+		for neighbor in current.neighbors: #go through list of neighbours for current spot
+			temp_g_score = g_score[current] + 1 #alt path from start to the neighbor node is +1 from current node
+
+			if temp_g_score < g_score[neighbor]: #update shortest path to neighbor
+				came_from[neighbor] = current #update parent of neighbor
+				g_score[neighbor] = temp_g_score
+				f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
+				if neighbor not in open_set_hash: #no duplicates in priority queue
+					count += 1
+					open_set.put((f_score[neighbor], count, neighbor))
+					open_set_hash.add(neighbor)
+					neighbor.make_open()
+		draw()
+
+		if current != start:
+			current.make_closed() #
+
+	return False #if no path found
 
 
 def make_grid(rows,width):
@@ -269,17 +275,16 @@ def draw_grid(win, rows, width):
         for j in range(rows):
             pygame.draw.line(win,GREY, (j * gap,0), (j * gap,width))
 
-def draw(win,grid,rows,width):
-    win.fill(WHITE)
+def draw(win, grid, rows, width, obs):
+	win.fill(WHITE)
 
-    #draw the grid lines
-    for row in grid :
-        #in a row, there are individual spots
-        for spot in row:
-            spot.draw(win)
-
-    draw_grid(win, rows, width)
-     #update the display
+	for row in grid:
+		for spot in row:
+			spot.draw(win) #draw the colour of the square 
+	draw_grid(win, rows, width)
+	for ob in obs: #must draw after gridlines if not will cover up
+		ob.draw(win)
+	# pygame.display.update()
 
 def get_clicked_pos(pos,rows,width):
     gap = width // rows
@@ -445,6 +450,7 @@ def createVirtualBarrier(grid, total_rows, obs1, end):
 		#virtual obs
 		grid[end.row+1][end.col].make_vbarrier()
 		grid[end.row+2][end.col].make_vbarrier()
+
 		for i in range(2):
 			for j in range(1,4):
 				if not grid[end.row-i][end.col+j].is_barrier() and end.row-i >= 0 and end.col+j < total_rows:
@@ -531,22 +537,23 @@ def expectedLeftTurnTheta(theta):
     elif theta == 180:
         return 270
 
-def simulation(win,grid,ROWS,width,robot,movements,start):
+def simulation(draw,win,robot,movements,start):
     nx = 0
     ny = 0
     headingAngle = 0
     robot = Robot((movements[0][0][0],movements[0][0][1]),"DDR.png",3 * 30,win)
     robot.theta = movements[0][2]
+    draw()
     for i in range(1,len(movements)):
 
         if movements[i-1][1] == 'F':
             if movements[i-1][2]:
-                robot.set_theta(movements[i-1][2])
-            
+                robot.set_theta(movements[i-1][2])            
             robot.updateAngle(robot.theta)
+
             if robot.theta == 0:
                 while (robot.x) <= movements[i][0][0]:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_forward()
                     robot.draw(win)
                     pygame.display.update()
@@ -554,7 +561,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             elif robot.theta == 180:
                 while robot.x >= movements[i][0][0]:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_forward()
                     robot.draw(win)
                     pygame.display.update()
@@ -562,7 +569,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             elif robot.theta == 90:
                 while robot.y >= movements[i][0][1]:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_forward()
                     robot.draw(win)
                     pygame.display.update()
@@ -570,7 +577,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             elif robot.theta == 270:
                 while robot.y <= movements[i][0][1]:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_forward()
                     robot.draw(win)
                     pygame.display.update()
@@ -581,28 +588,28 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             if temp_theta == 0:
                 while robot.theta < 90:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     nx,ny,headingAngle = robot.turnLeftN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
                     pygame.display.update()
 
             elif temp_theta == 180:
                 while robot.theta < 270:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     nx,ny,headingAngle = robot.turnLeftN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
                     pygame.display.update()
 
             elif temp_theta == 270:
                 while robot.theta < 360:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     nx,ny,headingAngle = robot.turnLeftN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
                     pygame.display.update()
 
             elif temp_theta == 90:
                  while robot.theta < 180:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     nx,ny,headingAngle = robot.turnLeftN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
                     pygame.display.update()
@@ -627,7 +634,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             if temp_theta == 0:
                 while robot.theta < 90:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     # print(headingAngle)
                     nx,ny,headingAngle = robot.turnRightN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
@@ -636,7 +643,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
             elif temp_theta == 180:
                 while robot.theta >= 90:
                    
-                    draw(win,grid,ROWS,width)
+                    draw()
                     # print(headingAngle)
                     nx,ny,headingAngle = robot.turnRightN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
@@ -644,7 +651,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
 
             elif temp_theta == 270:
                 while robot.theta > 180:
-                    draw(win,grid,ROWS,width)
+                    draw()
                     # print(headingAngle)
                     nx,ny,headingAngle = robot.turnRightN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
@@ -652,8 +659,7 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
                     
             elif temp_theta == 90:
                 while robot.theta > 0:
-                    draw(win,grid,ROWS,width)
-                    # print(headingAngle)
+                    draw()
                     nx,ny,headingAngle = robot.turnRightN(temp_theta,robot.x,robot.y,nx,ny,headingAngle)
                     robot.draw(win)
                     pygame.display.update()
@@ -662,32 +668,35 @@ def simulation(win,grid,ROWS,width,robot,movements,start):
             robot.updateY(ny)
             robot.theta = expectedRightTurnTheta(temp_theta)
             robot.updateAngle(robot.theta)
-            robot.draw(win)
             pygame.display.update()   
 
         elif movements[i-1][1] == "Rev":
             temp_theta = robot.theta
+
             if temp_theta == 0:
                 while robot.x >= (movements[i-1][0][0]):
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_backwards()
                     robot.draw(win)
                     pygame.display.update()
+
             elif temp_theta == 180:
                 while robot.x <= (movements[i-1][0][0]):
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_backwards()
                     robot.draw(win)
                     pygame.display.update()
+
             elif temp_theta == 270:
                 while robot.y >= (movements[i-1][0][1]):
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_backwards()
                     robot.draw(win)
                     pygame.display.update()
+
             elif temp_theta == 90:    
                 while robot.y <= (movements[i-1][0][1]):
-                    draw(win,grid,ROWS,width)
+                    draw()
                     robot.move_backwards()
                     robot.draw(win)
                     pygame.display.update()
@@ -699,7 +708,6 @@ def main(win,width):
     pygame.init()
     ROWS = 20
 
-    count = 0 
     grid = make_grid(ROWS,width)
     gap = width // ROWS
 
@@ -726,16 +734,7 @@ def main(win,width):
     x = start.return_center() + x
 
     run = True
-    dt = 0
-    lasttime = pygame.time.get_ticks()
 
-    # robot.setAngleDegrees(robot.theta)
-
-    # headingAngle = robot.theta
-
-    # nx = 0
-    # ny = 0
-    # count = 0
     obs1 = Obs(4, 11, width//ROWS, 270, grid)
     obs2 = Obs(17, 16, width//ROWS, 180, grid)
     obs3 = Obs(4, 3, width//ROWS, 270, grid)
@@ -751,29 +750,14 @@ def main(win,width):
 
     for ob in obs:
         createGoal(grid, ob)
-
- 
-
+    
+    draw(win,grid,ROWS,width,obs)
     copyObs = obs.copy()
-	#initialise the first goal pos
+    #initialise the first goal pos
     tempOb = copyObs.pop()
     end = createGoal(grid, tempOb)
  
     while run: 
-
-        draw(win,grid,ROWS,width)
-        for ob in obs: #must draw after gridlines if not will cover up
-            ob.draw(win)
-        # dt = (pygame.time.get_ticks()-lasttime) / 1000
-        # lasttime = pygame.time.get_ticks()
-
-        
-    #------------------------------- Testing the Turning ------------------------------------------
-        
-        # nx,ny,headingAngle = robot.turnRightN(robot.theta,robot.x,robot.y,nx,ny,headingAngle)
-        # nx,ny = robot.turnLeftN(robot.theta,robot.x,robot.y,nx,ny)
-        # nx,ny = robot.turnReverseRight(robot.theta,robot.x,robot.y,nx,ny)
-        # nx,ny = robot.turnReverseLeft(robot.theta,robot.x,robot.y,nx,ny)
     
         robot.draw(win)
         # robot.robot_frame((robot.x,robot.y),robot.theta)
@@ -790,7 +774,7 @@ def main(win,width):
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    movements =  algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
+                    movements =  algorithm(lambda: draw(win, grid, ROWS, width,obs), grid, start, end)
 					#lambda allows u to call a function inside the algo function, nth important
 					#reset virtual obs:
                     clearVBarrier(grid)
@@ -800,7 +784,7 @@ def main(win,width):
                         print("Pause")
                         print(movements)
                         if movements:
-                            robottheta = simulation(win,grid,ROWS,width,robot,movements,start)
+                            robottheta = simulation(lambda: draw(win, grid, ROWS, width,obs),win,robot,movements,start)
                             movements.clear()
                             
                         start = end
@@ -829,6 +813,7 @@ def main(win,width):
     pygame.quit()
 
 main(WIN,WIDTH)
+
 
 
         

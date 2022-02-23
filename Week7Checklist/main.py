@@ -69,9 +69,10 @@ def main(win, width):
                 run = False
                 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and start and end: #repeat for all 5 obs
-                    size = len(copyObs)
-                    while size >= 0:
+                if event.key == pygame.K_SPACE and start and end and len(copyObs) >= 0:
+                # if event.key == pygame.K_SPACE and start and end: #repeat for all 5 obs
+                    # size = len(copyObs)
+                    # while size >= 0:
                         for row in grid:
                             for spot in row:
                                 spot.update_neighbors(grid)
@@ -100,7 +101,7 @@ def main(win, width):
                             createOutGuide(grid, ROWS, lastOb, start)
                             end = createGoal(grid, tempOb)
                             createVirtualBarrier(grid, ROWS, tempOb, end)
-                        size-=1
+                        # size-=1
                         
 
                 if event.key == pygame.K_c: #clear entire screen

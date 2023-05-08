@@ -1,1 +1,1 @@
-# mdp_semester2_2022
+# CZ3004 MDP Algo

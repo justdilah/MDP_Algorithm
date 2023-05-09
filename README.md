@@ -17,7 +17,7 @@ My team is required to build a robot that navigates through the obstacles. For e
 Steps 3 - 9 are then repeated till the robot has reached its final obstacle.
 
 ### Brief explanation of the algorithm used
-<p>A* algortihm is used to generate an optimal path from the current destination to the next destination. A virtual environment is created for to simulate the robot movements to test the algorithm before integrating it with the rest of the components. </p>
+<p>A* algorithm is used to generate an optimal path from the current destination to the next destination. A virtual environment is created for to simulate the robot movements to test the algorithm before integrating it with the rest of the components. </p>
 
 <p>Pygame is used to build the virtual environment.</p>
 
